@@ -6,8 +6,7 @@ exefile=$2
 
 if [ $count -eq 2 -a -f "$codefile" ]
 then
-	gcc "$codefile" -o "$exefile"
-	./$exefile
+	gcc "$codefile" -o "$exefile" && exec "./$exefile"
 else
 	{
 		echo "You should use 2 arguments"
