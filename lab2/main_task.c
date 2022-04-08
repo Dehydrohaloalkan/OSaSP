@@ -103,12 +103,14 @@ void output_dublicates() {
 
     long file_sizes[file_paths_count];
     int file_dictionary[file_paths_count];
+    int flags[file_paths_count];
 
     struct stat file_stat;
     for (int i = 0; i < file_paths_count; ++i) {
         stat(file_paths[i], &file_stat);
         file_sizes[i] = file_stat.st_size;
         file_dictionary[i] = i;
+        flags[i] = 0;
     }
 
     // bubble sort
@@ -123,7 +125,6 @@ void output_dublicates() {
     }
 
     int fDublicates = 0;
-    int prevHasDublicate = 0;
     for (int i = 0; i < file_paths_count; i++) {
 
         int hasDublicate = 0;
@@ -151,13 +152,15 @@ void output_dublicates() {
                     fDublicates = 1;
                     printf("Dublicates:\n\n");
                 }
-                if (!hasDublicate) {
-                    if (prevHasDublicate)
-                        printf("\n");
-                    printf("%s\n", file_paths[file_dictionary[i]]);
-                }
+
+                if (!hasDublicate && !flags[file_dictionary[i]])
+                    printf("\n%s\n", file_paths[file_dictionary[i]]);
                 hasDublicate++;
-                printf("   EQUALS\n%s\n", file_paths[file_dictionary[j]]);
+                if (!flags[file_dictionary[j]])
+                    printf("   EQUALS\n%s\n", file_paths[file_dictionary[j]]);
+
+                flags[file_dictionary[i]] = 1;
+                flags[file_dictionary[j]] = 1;
 
                 fDublicates = 1;
             }
@@ -167,11 +170,6 @@ void output_dublicates() {
         }
 
         fclose(file1);
-
-        prevHasDublicate = hasDublicate;
-
-        if (hasDublicate > 1)
-            i += hasDublicate - 1;
     }
 
     if (!fDublicates) {
