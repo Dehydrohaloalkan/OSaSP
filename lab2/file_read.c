@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 int main(int argc, char const *argv[]) {
     if (argc != 3) {
@@ -9,7 +10,13 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    int lines_count = strtol(argv[2], NULL, 10);
+    char* endptr;
+    int lines_count = strtol(argv[2], &endptr, 10);
+    if ((endptr == argv[2]) || (*endptr != '\0') || (errno == ERANGE)) {
+        fprintf(stderr, "Invalid argument. Count is not a number \n");
+        return 1;
+    }
+
     if (lines_count < 0) {
         fprintf(stderr, "Invalid count of lines.\n");
         return 1;
