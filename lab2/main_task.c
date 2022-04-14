@@ -3,8 +3,9 @@
 #include <dirent.h>
 #include "sys/stat.h"
 #include <string.h>
+#include <errno.h>
 
-int check_directory(char const *dir_name, int minSize, int maxSize);
+int find_files(char const *dir_name, int minSize, int maxSize);
 
 void add_path(const char *file_path);
 
@@ -25,8 +26,17 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    int min_size = strtol(argv[2], NULL, 10);
-    int max_size = strtol(argv[3], NULL, 10);
+    char* endptr;
+    int min_size = strtol(argv[2], &endptr, 10);
+    if ((endptr == argv[2]) || (*endptr != '\0') || (errno == ERANGE)) {
+        fprintf(stderr, "Invalid argument. min_size is not a number \n");
+        return 1;
+    }
+    int max_size = strtol(argv[3], &endptr, 10);
+    if ((endptr == argv[3]) || (*endptr != '\0') || (errno == ERANGE)) {
+        fprintf(stderr, "Invalid argument. max_size is not a number \n");
+        return 1;
+    }
     if (min_size < 0 || max_size < 0) {
         fprintf(stderr, "Size cannot be less than 0 bytes!\n");
         return 1;
@@ -43,15 +53,14 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
 
-    check_directory(argv[1], min_size, max_size);
+    find_files(argv[1], min_size, max_size);
     output_dublicates();
 
     free(file_paths);
-
     return 0;
 }
 
-int check_directory(char const *dir_name, int min_size, int max_size) {
+int find_files(char const *dir_name, int min_size, int max_size) {
     DIR *current_dir = opendir(dir_name);
     if (!current_dir) {
         perror("opendir");
@@ -60,7 +69,6 @@ int check_directory(char const *dir_name, int min_size, int max_size) {
 
     struct dirent *d;
 
-    int i = 1;
     while ((d = readdir(current_dir))) {
 
         Path filepath;
@@ -73,7 +81,7 @@ int check_directory(char const *dir_name, int min_size, int max_size) {
             if (file_stat.st_size >= min_size && file_stat.st_size <= max_size)
                 add_path(filepath);
         } else if (d->d_type == DT_DIR && strcmp(".", d->d_name) * strcmp("..", d->d_name)) {
-            check_directory(filepath, min_size, max_size);
+            find_files(filepath, min_size, max_size);
         }
     }
 
