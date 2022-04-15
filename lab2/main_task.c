@@ -132,22 +132,21 @@ void output_dublicates() {
         }
     }
 
-    int fDublicates = 0;
-    for (int i = 0; i < file_paths_count; i++) {
+    int dublicates_flag = 0;
+    int dublicates_group_flag = 0;
 
-        int hasDublicate = 0;
-        FILE *file1 = fopen(file_paths[file_dictionary[i]], "r");
-        if (!file1)
-            continue;
+    int i = 0, j;
+    while (i < file_paths_count) {
 
-        int j = i + 1;
+        j = i + 1;
+
         while (j < file_paths_count && (file_sizes[file_dictionary[i]] == file_sizes[file_dictionary[j]])) {
 
-            fseek(file1, SEEK_SET, 0);
+            FILE *file1 = fopen(file_paths[file_dictionary[i]], "r");
+            if (!file1) continue;
 
             FILE *file2 = fopen(file_paths[file_dictionary[j]], "r");
-            if (!file2)
-                continue;
+            if (!file2) continue;
 
             char c1, c2;
             do {
@@ -156,31 +155,30 @@ void output_dublicates() {
             } while (c1 != EOF && c2 != EOF && c1 == c2);
 
             if (c1 == c2 && c1 == EOF) {
-                if (!fDublicates) {
-                    fDublicates = 1;
-                    printf("Dublicates:\n\n");
+                if (!dublicates_flag) {
+                    dublicates_flag = 1;
+                    printf("Dublicates:\n");
                 }
 
-                if (!hasDublicate && !flags[file_dictionary[i]])
+                if (!dublicates_group_flag && !flags[file_dictionary[i]])
                     printf("\n%s\n", file_paths[file_dictionary[i]]);
-                hasDublicate++;
+                dublicates_group_flag = 1;
                 if (!flags[file_dictionary[j]])
                     printf("   EQUALS\n%s\n", file_paths[file_dictionary[j]]);
 
                 flags[file_dictionary[i]] = 1;
                 flags[file_dictionary[j]] = 1;
-
-                fDublicates = 1;
             }
 
             fclose(file2);
+            fclose(file1);
             j++;
         }
-
-        fclose(file1);
+        i = j;
+        dublicates_group_flag = 0;
     }
 
-    if (!fDublicates) {
+    if (!dublicates_flag) {
         printf("There are no dublicates.\n");
     }
 }
