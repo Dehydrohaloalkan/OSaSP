@@ -143,10 +143,12 @@ void output_dublicates() {
         while (j < file_paths_count && (file_sizes[file_dictionary[i]] == file_sizes[file_dictionary[j]])) {
 
             FILE *file1 = fopen(file_paths[file_dictionary[i]], "r");
-            if (!file1) continue;
+            if (!file1)
+                goto file_closing;
 
             FILE *file2 = fopen(file_paths[file_dictionary[j]], "r");
-            if (!file2) continue;
+            if (!file2)
+                goto file_closing;
 
             char c1, c2;
             do {
@@ -170,8 +172,11 @@ void output_dublicates() {
                 flags[file_dictionary[j]] = 1;
             }
 
-            fclose(file2);
-            fclose(file1);
+            file_closing:
+            if (file1)
+                fclose(file1);
+            if (file2)
+                fclose(file2);
             j++;
         }
         i = j;
